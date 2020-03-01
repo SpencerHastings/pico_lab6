@@ -1,8 +1,7 @@
 ruleset manage_sensors {
 
     meta {
-        provides sensors
-        shares sensors
+        shares __testing
     }
 
     global {
