@@ -1,11 +1,24 @@
 ruleset wovyn_base {
 
     meta {
+        shares __testing
         use module sensor_profile alias profile
         use module twilio_lesson_keys
         use module twilio_m alias twilio
             with account_sid = keys:twilio{"account_sid"}
                 auth_token =  keys:twilio{"auth_token"}
+        
+    }
+
+    global {
+        __testing = { "queries": [],
+            "events":  
+            [ 
+                { 
+                    "domain": "wovyn", "type": "fakeheartbeat", "attrs": [ "temperature" ] 
+                }
+            ] 
+        }
     }
 
     rule process_heartbeat {
@@ -18,6 +31,19 @@ ruleset wovyn_base {
         fired {
             raise wovyn event "new_temperature_reading"
                 attributes {"temperature":temp.get("temperatureF"), "timestamp":time:now()}
+        }
+    }
+
+    rule process_fake_heartbeat {
+        select when wovyn:fakeheartbeat
+        pre {
+            temp = event:attr("temperature")
+
+        }
+        send_directive("test", {"hello": "world"})
+        fired {
+            raise wovyn event "new_temperature_reading"
+                attributes {"temperature":temp, "timestamp":time:now()}
         }
     }
 

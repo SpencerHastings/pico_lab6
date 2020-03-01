@@ -2,7 +2,7 @@ ruleset temperature_store {
 
     meta {
         provides temperatures, threshold_violations, inrange_temperatures, last_temperature
-        shares temperatures, threshold_violations, inrange_temperatures, last_temperature
+        shares temperatures, threshold_violations, inrange_temperatures, last_temperature, __testing
     }
 
     global {
@@ -22,13 +22,22 @@ ruleset temperature_store {
             ent:temps[ent:temps.length() - 1]
         }
 
+        __testing = { "queries": [],
+            "events":  
+            [ 
+                { 
+                    "domain": "sensor", "type": "reading_reset", "attrs": [ ] 
+                }
+            ] 
+        }
+
     }
 
     rule collect_temperatures {
         select when wovyn:new_temperature_reading
 
         always {
-            ent:temps := ent:temps.append({"temperature":event:attr("temperature"), "timestamp":event:attr("timestamp")})
+            ent:temps := ent:temps.defaultsTo([]).append({"temperature":event:attr("temperature"), "timestamp":event:attr("timestamp")})
         }
 
     }

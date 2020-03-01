@@ -1,7 +1,8 @@
 ruleset manage_sensors {
 
     meta {
-        shares __testing
+        provides all_temperatures
+        shares __testing, all_temperatures
     }
 
     global {
@@ -25,13 +26,27 @@ ruleset manage_sensors {
                 function(s) {
                     eci = s.get("eci")
                     args = {}
-                    Wrangler:skyQuery(eci, "temperature_store", "last_temperature", args)
+                    host = "http://localhost:8080";
+                    url = host + "/sky/cloud/" + eci + "/temperature_store/temperatures";
+                    response = http:get(url,args);
+                    answer = response{"content"}.decode();
+                    answer
+                    // ret = wrangler:skyQuery(eci, "temperature_store", "temperatures", args)
+                    // ret
                 }
             )
         }
 
         __testing = { "queries": [],
-            "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "name" ] } ] 
+            "events":  
+            [ 
+                { 
+                    "domain": "sensor", "type": "new_sensor", "attrs": [ "name" ] 
+                },
+                { 
+                    "domain": "sensor", "type": "unneeded_sensor", "attrs": [ "name" ] 
+                }
+            ] 
         }
 
     }
@@ -54,7 +69,7 @@ ruleset manage_sensors {
             raise wrangler event "child_creation"
                 attributes { 
                     "name": name, 
-                    "color": "0x555555",
+                    "color": "#555555",
                     "rids": rids 
                 }
         }
@@ -72,15 +87,13 @@ ruleset manage_sensors {
         if (check != null) then
             send_directive("deleting sensor", {"name": name_to_delete})
         fired {
-            raise wrangler event "child_deletion"
-                attributes {"name": name_to_delete};
             ent:sensors := ent:sensors.filter(
                 function(s) {
-                    function(s) {
-                        s.get("name") != name_to_delete
-                    }
+                    s.get("name") != name_to_delete
                 }
             )
+            raise wrangler event "child_deletion"
+                attributes {"name": name_to_delete};
         }
     }
 
