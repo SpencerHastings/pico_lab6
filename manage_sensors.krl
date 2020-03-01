@@ -31,7 +31,9 @@ ruleset manage_sensors {
             )
         }
 
-        __testing = { "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "name" ] } ] }
+        __testing = { "queries": [],
+            "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "name" ] } ] 
+        }
 
     }
     
