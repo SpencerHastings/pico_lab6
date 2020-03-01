@@ -43,7 +43,7 @@ ruleset manage_sensors {
             check = sensors(name)
             eci = meta:eci
 
-            rids = "temperature_store;wovyn_base;sensor_profile"
+            rids = "temperature_store;sensor_profile;twilio_lesson_keys;twilio_m;wovyn_base"
         }
         
         if (check != null) then
